@@ -251,21 +251,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
                 className="w-full py-2.5 rounded-xl bg-primary text-white hover:bg-primary/95 text-xs font-bold transition-all cursor-pointer shadow-lg shadow-primary/20"
               >
                 Masuk Sistem
-              </button>
-
-              <div className="pt-3.5 border-t border-zinc-850 text-center">
-                <span className="text-[9px] text-zinc-500 block font-medium">
-                  Petunjuk Akun Bawaan:
-                </span>
-                <div className="flex justify-center gap-4 mt-1.5 text-[9px] text-zinc-400 font-mono">
-                  <div>
-                    <span className="text-zinc-500">Admin:</span> <code className="text-zinc-300 bg-zinc-900 px-1 py-0.5 rounded">admin</code> / <code className="text-zinc-300 bg-zinc-900 px-1 py-0.5 rounded">admin123</code>
-                  </div>
-                  <div>
-                    <span className="text-zinc-500">Kasir:</span> <code className="text-zinc-300 bg-zinc-900 px-1 py-0.5 rounded">siti</code> / <code className="text-zinc-300 bg-zinc-900 px-1 py-0.5 rounded">siti123</code>
-                  </div>
-                </div>
-              </div>
+              </button>              
             </form>
           </div>
         </div>
