@@ -377,7 +377,7 @@ export default function Cashier() {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {dbProducts.filter(p => p.isActive && (selectedCatId === null || p.categoryId === selectedCatId) && (searchQuery === "" || p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.barcode.includes(searchQuery))).map((p) => {
               const isLow = p.stock <= p.minStock;
-              const hasDiscount = p.discountPercent && p.discountPercent > 0;
+              const hasDiscount = !!(p.discountPercent && p.discountPercent > 0);
               return (
                 <button
                   key={p.id}
@@ -454,7 +454,7 @@ export default function Cashier() {
           ) : (
             items.map((item) => {
               const p = dbProducts.find(prod => prod.id === item.productId);
-              const hasDiscount = item.discountPercent && item.discountPercent > 0;
+              const hasDiscount = !!(item.discountPercent && item.discountPercent > 0);
               return (
                 <div key={item.productId} className="flex flex-col bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-700 space-y-2">
                   <div className="min-w-0">
