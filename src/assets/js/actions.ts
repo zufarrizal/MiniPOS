@@ -1,6 +1,6 @@
 "use server";
 
-import { db } from "../db/db";
+import { db } from "@/db/db";
 import { 
   products, 
   categories, 
@@ -10,7 +10,7 @@ import {
   transactionItems, 
   users,
   settings 
-} from "../db/schema";
+} from "@/db/schema";
 import { eq, desc, and, sql, ne } from "drizzle-orm";
 
 // ----------------------------------------------------

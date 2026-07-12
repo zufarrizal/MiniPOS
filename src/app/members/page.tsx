@@ -12,7 +12,7 @@ import {
   Calendar
 } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
-import { getCustomers, saveCustomerAction, deleteCustomerAction } from "@/app/actions";
+import { getCustomers, saveCustomerAction, deleteCustomerAction } from "@/assets/js/actions";
 
 interface Member {
   id: number;

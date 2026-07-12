@@ -12,7 +12,7 @@ import {
   PackageCheck
 } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
-import { getSettingsAction, saveSettingsAction } from "@/app/actions";
+import { getSettingsAction, saveSettingsAction } from "@/assets/js/actions";
 
 interface SettingItem {
   key: string;

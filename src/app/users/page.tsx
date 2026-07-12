@@ -11,7 +11,7 @@ import {
   UserCheck,
   Plus
 } from "lucide-react";
-import { getUsers, saveUserAction, deleteUserAction } from "@/app/actions";
+import { getUsers, saveUserAction, deleteUserAction } from "@/assets/js/actions";
 import { useCartStore } from "@/store/cartStore";
 
 interface StaffUser {

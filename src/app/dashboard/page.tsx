@@ -12,7 +12,7 @@ import {
   ShoppingBag
 } from "lucide-react";
 import { Product, Transaction } from "@/data/mockData";
-import { getProducts, getTransactions } from "@/app/actions";
+import { getProducts, getTransactions } from "@/assets/js/actions";
 import {
   BarChart,
   Bar,

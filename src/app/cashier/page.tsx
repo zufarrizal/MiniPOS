@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { Product, Customer } from "@/data/mockData";
-import { getProducts, getCustomers, createTransactionAction, getSettingsAction, getCategories } from "@/app/actions";
+import { getProducts, getCustomers, createTransactionAction, getSettingsAction, getCategories } from "@/assets/js/actions";
 
 export default function Cashier() {
   const {

@@ -6,7 +6,7 @@ import {
   createTransactionAction, 
   getTransactions, 
   getShiftLogs 
-} from "../app/actions";
+} from "../assets/js/actions";
 import { db } from "./db";
 import { shifts, transactions, transactionItems, products } from "./schema";
 import { eq } from "drizzle-orm";

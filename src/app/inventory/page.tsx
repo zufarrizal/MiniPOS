@@ -23,7 +23,7 @@ import {
   deleteProductAction, 
   addCategoryAction,
   getSettingsAction
-} from "@/app/actions";
+} from "@/assets/js/actions";
 
 export default function Inventory() {
   const [products, setProducts] = useState<Product[]>([]);

@@ -4,7 +4,7 @@ import {
   getOpenShift, 
   openShiftAction, 
   closeShiftAction 
-} from '../app/actions';
+} from '../assets/js/actions';
 
 export interface UserInfo {
   id: number;

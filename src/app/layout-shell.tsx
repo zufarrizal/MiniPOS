@@ -18,7 +18,7 @@ import {
   Lock
 } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
-import { authenticateUserAction, getSettingsAction } from "@/app/actions";
+import { authenticateUserAction, getSettingsAction } from "@/assets/js/actions";
 
 export default function LayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

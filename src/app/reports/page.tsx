@@ -17,7 +17,7 @@ import {
   Trash2
 } from "lucide-react";
 import { Transaction, Shift } from "@/data/mockData";
-import { getTransactions, getShiftLogs, deleteShiftAction, getSettingsAction } from "@/app/actions";
+import { getTransactions, getShiftLogs, deleteShiftAction, getSettingsAction } from "@/assets/js/actions";
 import { useCartStore } from "@/store/cartStore";
 
 export default function Reports() {
