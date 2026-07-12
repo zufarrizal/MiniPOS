@@ -156,6 +156,22 @@ export const useCartStore = create<CartState>((set, get) => ({
     if (res.success && res.shift) {
       set({ activeShift: null });
       return { success: true, shift: res.shift };
+    } else if (res.error === "Shift tidak ditemukan.") {
+      // If the shift was deleted from the database, force-clear the local active shift to unblock the cashier
+      set({ activeShift: null });
+      return { 
+        success: true, 
+        shift: { 
+          id: shift.id, 
+          cashierName: shift.cashierName,
+          startTime: shift.startTime,
+          startingCash: shift.startingCash, 
+          expectedEndingCash: shift.expectedEndingCash, 
+          actualEndingCash, 
+          discrepancy: 0,
+          status: 'CLOSED'
+        } 
+      };
     } else {
       return { success: false, error: res.error };
     }
