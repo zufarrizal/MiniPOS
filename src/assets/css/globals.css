@@ -13,7 +13,7 @@
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
  
-    --primary: 263.4 70% 50.4%; /* Sleek Purple */
+    --primary: 142.1 70% 45%; /* Modern Mint/Emerald Green */
     --primary-foreground: 210 20% 98%;
  
     --secondary: 240 3.7% 15.9%;
@@ -30,7 +30,7 @@
  
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
-    --ring: 263.4 70% 50.4%;
+    --ring: 142.1 70% 45%;
  
     --radius: 0.75rem;
   }

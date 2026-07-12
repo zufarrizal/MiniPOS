@@ -219,7 +219,7 @@ export default function UsersManagement() {
                     <td className="py-4 px-6">
                       <span className={`text-[9px] font-bold px-2.5 py-1 rounded-full border ${
                         user.role === 'ADMIN' 
-                          ? "bg-purple-500/10 border-purple-500/25 text-purple-400" 
+                          ? "bg-indigo-500/10 border-indigo-500/25 text-indigo-400" 
                           : "bg-emerald-500/10 border-emerald-500/25 text-emerald-400"
                       }`}>
                         {user.role === 'ADMIN' ? 'SUPERVISOR' : 'KASIR'}
@@ -331,7 +331,7 @@ export default function UsersManagement() {
                     onClick={() => setRole("ADMIN")}
                     className={`py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                       role === "ADMIN"
-                        ? "bg-purple-500/10 border-purple-500/40 text-purple-400"
+                        ? "bg-indigo-500/10 border-indigo-500/40 text-indigo-400"
                         : "bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-zinc-300"
                     }`}
                   >

@@ -644,7 +644,7 @@ export default function Cashier() {
                 </div>
               )}
               {memberDiscount > 0 && (
-                <div className="flex justify-between text-violet-400">
+                <div className="flex justify-between text-sky-400">
                   <span>Diskon Member ({memberDiscountRate}%):</span>
                   <span>-Rp {memberDiscount.toLocaleString("id-ID")}</span>
                 </div>
@@ -741,7 +741,7 @@ export default function Cashier() {
                   </div>
                 )}
                 {memberDiscount > 0 && (
-                  <div className="flex justify-between items-center text-violet-400 text-xs">
+                  <div className="flex justify-between items-center text-sky-400 text-xs">
                     <span>Diskon Member ({memberDiscountRate}%)</span>
                     <span>-Rp {memberDiscount.toLocaleString("id-ID")}</span>
                   </div>

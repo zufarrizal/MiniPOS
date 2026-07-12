@@ -173,7 +173,7 @@ export default function SettingsPage() {
           {/* Left Navigation Sidebar */}
           <div className="w-64 flex flex-col gap-2 shrink-0">
             {[
-              { id: 'profile', label: 'Profil & Struk', desc: 'Identitas toko & footer struk', icon: Store, color: 'text-purple-400 bg-purple-500/10' },
+              { id: 'profile', label: 'Profil & Struk', desc: 'Identitas toko & footer struk', icon: Store, color: 'text-blue-400 bg-blue-500/10' },
               { id: 'finance', label: 'Keuangan & PPN', desc: 'Kebijakan pajak & modal awal', icon: Percent, color: 'text-red-400 bg-red-500/10' },
               { id: 'loyalty', label: 'Poin & Loyalitas', desc: 'Perolehan & tukar poin member', icon: Coins, color: 'text-emerald-400 bg-emerald-500/10' },
               { id: 'inventory', label: 'Sistem Inventaris', desc: 'Batas stok minimum default', icon: PackageCheck, color: 'text-orange-400 bg-orange-500/10' },
