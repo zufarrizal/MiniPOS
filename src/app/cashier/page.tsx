@@ -812,123 +812,128 @@ export default function Cashier() {
 
       {/* Simulated Thermal Receipt Modal */}
       {showReceiptModal && lastInvoice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm">
-          <div className="w-[340px] bg-white text-zinc-900 p-6 rounded-md shadow-2xl relative font-mono text-[11px] animate-in fade-in zoom-in-95 duration-200 leading-normal">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+          <div className="w-[340px] max-h-[90vh] bg-white text-zinc-900 rounded-2xl shadow-2xl flex flex-col overflow-hidden font-mono text-[11px] animate-in fade-in zoom-in-95 duration-200 leading-normal">
             
-            {/* Simulation Thermal Styling Header */}
-            <div className="text-center space-y-1 mb-4 border-b border-dashed border-zinc-400 pb-3">
-              <h4 className="font-bold text-sm text-zinc-950 uppercase">{storeName}</h4>
-              <p className="text-[10px] text-zinc-600">{storeAddress}</p>
-              <p className="text-[9px] text-zinc-500">Telp: {storePhone}</p>
-            </div>             {/* Receipt Metadata */}
-            <div className="space-y-1 text-zinc-700 border-b border-dashed border-zinc-400 pb-3 mb-3">
-              <p>Invoice : {lastInvoice.invoiceNumber}</p>
-              <p>Kasir   : {lastInvoice.cashierName}</p>
-              <p>Waktu   : {lastInvoice.createdAt ? new Date(lastInvoice.createdAt).toLocaleString("id-ID") : "-"}</p>
-              {lastInvoice.customerName && <p>Member  : {lastInvoice.customerName}</p>}
-            </div>
+            {/* Scrollable Receipt Body */}
+            <div className="flex-1 overflow-y-auto p-6 pb-2">
+              {/* Simulation Thermal Styling Header */}
+              <div className="text-center space-y-1 mb-4 border-b border-dashed border-zinc-400 pb-3">
+                <h4 className="font-bold text-sm text-zinc-950 uppercase">{storeName}</h4>
+                <p className="text-[10px] text-zinc-600">{storeAddress}</p>
+                <p className="text-[9px] text-zinc-500">Telp: {storePhone}</p>
+              </div>
 
-            {/* Invoice Items */}
-            <div className="space-y-2 border-b border-dashed border-zinc-400 pb-3 mb-3">
-              {(lastInvoice.items || []).map((it: any) => (
-                <div key={it.productId}>
-                  <p className="font-bold text-zinc-900">{it.productName}</p>
-                  <div className="flex justify-between text-zinc-700 pl-2">
-                    <span>{it.quantity} x Rp {it.sellPrice.toLocaleString("id-ID")}</span>
-                    <span>Rp {it.subtotal.toLocaleString("id-ID")}</span>
+              {/* Receipt Metadata */}
+              <div className="space-y-1 text-zinc-700 border-b border-dashed border-zinc-400 pb-3 mb-3">
+                <p>Invoice : {lastInvoice.invoiceNumber}</p>
+                <p>Kasir   : {lastInvoice.cashierName}</p>
+                <p>Waktu   : {lastInvoice.createdAt ? new Date(lastInvoice.createdAt).toLocaleString("id-ID") : "-"}</p>
+                {lastInvoice.customerName && <p>Member  : {lastInvoice.customerName}</p>}
+              </div>
+
+              {/* Invoice Items */}
+              <div className="space-y-2 border-b border-dashed border-zinc-400 pb-3 mb-3">
+                {(lastInvoice.items || []).map((it: any) => (
+                  <div key={it.productId}>
+                    <p className="font-bold text-zinc-900">{it.productName}</p>
+                    <div className="flex justify-between text-zinc-700 pl-2">
+                      <span>{it.quantity} x Rp {it.sellPrice.toLocaleString("id-ID")}</span>
+                      <span>Rp {it.subtotal.toLocaleString("id-ID")}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            {/* Calculations block */}
-            <div className="space-y-1 border-b border-dashed border-zinc-400 pb-3 mb-3">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>Rp {lastInvoice.totalRaw.toLocaleString("id-ID")}</span>
-              </div>
-              {(lastInvoice.manualDiscount ?? 0) > 0 && (
-                <div className="flex justify-between text-red-600">
-                  <span>Diskon Manual</span>
-                  <span>-Rp {(lastInvoice.manualDiscount ?? 0).toLocaleString("id-ID")}</span>
+              {/* Calculations block */}
+              <div className="space-y-1 border-b border-dashed border-zinc-400 pb-3 mb-3">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>Rp {lastInvoice.totalRaw.toLocaleString("id-ID")}</span>
                 </div>
-              )}
-              {(lastInvoice.grosirDiscount ?? 0) > 0 && (
-                <div className="flex justify-between text-red-600">
-                  <span>Promo Grosir ({grosirDiscountRate}%)</span>
-                  <span>-Rp {(lastInvoice.grosirDiscount ?? 0).toLocaleString("id-ID")}</span>
-                </div>
-              )}
-              {(lastInvoice.memberDiscount ?? 0) > 0 && (
-                <div className="flex justify-between text-red-600">
-                  <span>Diskon Member ({memberDiscountRate}%)</span>
-                  <span>-Rp {(lastInvoice.memberDiscount ?? 0).toLocaleString("id-ID")}</span>
-                </div>
-              )}
-              {(lastInvoice.pointsDiscount ?? 0) > 0 && (
-                <div className="flex justify-between text-red-600">
-                  <span>Diskon Poin</span>
-                  <span>-Rp {(lastInvoice.pointsDiscount ?? 0).toLocaleString("id-ID")}</span>
-                </div>
-              )}
-              {!(lastInvoice.manualDiscount !== undefined || lastInvoice.grosirDiscount !== undefined || lastInvoice.memberDiscount !== undefined || lastInvoice.pointsDiscount !== undefined) && lastInvoice.discount > 0 && (
-                <div className="flex justify-between text-red-600">
-                  <span>Diskon</span>
-                  <span>-Rp {lastInvoice.discount.toLocaleString("id-ID")}</span>
-                </div>
-              )}
-              {lastInvoice.tax > 0 && (
-                <div className="flex justify-between text-zinc-700">
-                  <span>PPN ({lastInvoice.taxRate}%)</span>
-                  <span>Rp {lastInvoice.tax.toLocaleString("id-ID")}</span>
-                </div>
-              )}
-              <div className="flex justify-between font-bold text-zinc-950 text-xs pt-1">
-                <span>TOTAL</span>
-                <span>Rp {lastInvoice.totalPaid.toLocaleString("id-ID")}</span>
-              </div>
-            </div>
-
-            {/* Payment info */}
-            <div className="space-y-1 mb-4 text-zinc-700 border-b border-dashed border-zinc-400 pb-3">
-              <div className="flex justify-between">
-                <span>Metode Bayar</span>
-                <span>{lastInvoice.paymentMethod}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Diterima</span>
-                <span>Rp {lastInvoice.amountReceived.toLocaleString("id-ID")}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Kembalian</span>
-                <span>Rp {lastInvoice.changeAmount.toLocaleString("id-ID")}</span>
-              </div>
-            </div>
-
-            {/* Member loyalty points summary */}
-            {lastInvoice.customerName && (
-              <div className="space-y-1 mb-4 text-[10px] text-zinc-600">
-                {lastInvoice.pointsRedeemed > 0 && (
-                  <div className="flex justify-between">
-                    <span>Poin Ditukarkan</span>
-                    <span>-{lastInvoice.pointsRedeemed} Poin</span>
+                {(lastInvoice.manualDiscount ?? 0) > 0 && (
+                  <div className="flex justify-between text-red-600">
+                    <span>Diskon Manual</span>
+                    <span>-Rp {(lastInvoice.manualDiscount ?? 0).toLocaleString("id-ID")}</span>
                   </div>
                 )}
-                <div className="flex justify-between">
-                  <span>Poin Didapatkan</span>
-                  <span>+{Math.floor(lastInvoice.totalPaid / pointsMultiplier)} Poin</span>
+                {(lastInvoice.grosirDiscount ?? 0) > 0 && (
+                  <div className="flex justify-between text-red-600">
+                    <span>Promo Grosir ({grosirDiscountRate}%)</span>
+                    <span>-Rp {(lastInvoice.grosirDiscount ?? 0).toLocaleString("id-ID")}</span>
+                  </div>
+                )}
+                {(lastInvoice.memberDiscount ?? 0) > 0 && (
+                  <div className="flex justify-between text-red-600">
+                    <span>Diskon Member ({memberDiscountRate}%)</span>
+                    <span>-Rp {(lastInvoice.memberDiscount ?? 0).toLocaleString("id-ID")}</span>
+                  </div>
+                )}
+                {(lastInvoice.pointsDiscount ?? 0) > 0 && (
+                  <div className="flex justify-between text-red-600">
+                    <span>Diskon Poin</span>
+                    <span>-Rp {(lastInvoice.pointsDiscount ?? 0).toLocaleString("id-ID")}</span>
+                  </div>
+                )}
+                {!(lastInvoice.manualDiscount !== undefined || lastInvoice.grosirDiscount !== undefined || lastInvoice.memberDiscount !== undefined || lastInvoice.pointsDiscount !== undefined) && lastInvoice.discount > 0 && (
+                  <div className="flex justify-between text-red-600">
+                    <span>Diskon</span>
+                    <span>-Rp {lastInvoice.discount.toLocaleString("id-ID")}</span>
+                  </div>
+                )}
+                {lastInvoice.tax > 0 && (
+                  <div className="flex justify-between text-zinc-700">
+                    <span>PPN ({lastInvoice.taxRate}%)</span>
+                    <span>Rp {lastInvoice.tax.toLocaleString("id-ID")}</span>
+                  </div>
+                )}
+                <div className="flex justify-between font-bold text-zinc-950 text-xs pt-1">
+                  <span>TOTAL</span>
+                  <span>Rp {lastInvoice.totalPaid.toLocaleString("id-ID")}</span>
                 </div>
               </div>
-            )}
 
-            {/* Receipt Footer */}
-            <div className="text-center border-t border-dashed border-zinc-400 pt-3 text-[10px] text-zinc-600">
-              <p className="font-bold text-zinc-800">--- TERIMA KASIH ---</p>
-              <p className="mt-1">{receiptFooter}</p>
+              {/* Payment info */}
+              <div className="space-y-1 mb-4 text-zinc-700 border-b border-dashed border-zinc-400 pb-3">
+                <div className="flex justify-between">
+                  <span>Metode Bayar</span>
+                  <span>{lastInvoice.paymentMethod}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Diterima</span>
+                  <span>Rp {lastInvoice.amountReceived.toLocaleString("id-ID")}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Kembalian</span>
+                  <span>Rp {lastInvoice.changeAmount.toLocaleString("id-ID")}</span>
+                </div>
+              </div>
+
+              {/* Member loyalty points summary */}
+              {lastInvoice.customerName && (
+                <div className="space-y-1 mb-4 text-[10px] text-zinc-600">
+                  {lastInvoice.pointsRedeemed > 0 && (
+                    <div className="flex justify-between">
+                      <span>Poin Ditukarkan</span>
+                      <span>-{lastInvoice.pointsRedeemed} Poin</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span>Poin Didapatkan</span>
+                    <span>+{Math.floor(lastInvoice.totalPaid / pointsMultiplier)} Poin</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Receipt Footer */}
+              <div className="text-center border-t border-dashed border-zinc-400 pt-3 text-[10px] text-zinc-600 pb-2">
+                <p className="font-bold text-zinc-800">--- TERIMA KASIH ---</p>
+                <p className="mt-1">{receiptFooter}</p>
+              </div>
             </div>
 
-            {/* Print Action Bar */}
-            <div className="absolute top-full left-0 right-0 mt-4 flex gap-3">
+            {/* Static Action Footer inside Card */}
+            <div className="p-4 border-t border-dashed border-zinc-200 bg-zinc-50 flex gap-3 shrink-0">
               <button
                 onClick={() => {
                   window.print();

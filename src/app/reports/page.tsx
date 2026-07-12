@@ -410,95 +410,99 @@ export default function Reports() {
       </div>
 
       {/* View Detailed Struk Receipt Modal */}
-      {selectedTx && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm">
-          <div className="w-[340px] bg-white text-zinc-900 p-6 rounded-md shadow-2xl relative font-mono text-[11px] leading-normal">
+       {selectedTx && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+          <div className="w-[340px] max-h-[90vh] bg-white text-zinc-900 rounded-2xl shadow-2xl flex flex-col overflow-hidden font-mono text-[11px] leading-normal animate-in fade-in zoom-in-95 duration-200">
             
-            <div className="text-center space-y-1 mb-4 border-b border-dashed border-zinc-400 pb-3">
-              <h4 className="font-bold text-sm text-zinc-950">{storeName}</h4>
-              <p className="text-[10px] text-zinc-600">{storeAddress}</p>
-            </div>
+            {/* Scrollable Receipt Body */}
+            <div className="flex-1 overflow-y-auto p-6 pb-2">
+              <div className="text-center space-y-1 mb-4 border-b border-dashed border-zinc-400 pb-3">
+                <h4 className="font-bold text-sm text-zinc-950">{storeName}</h4>
+                <p className="text-[10px] text-zinc-600">{storeAddress}</p>
+              </div>
 
-            <div className="space-y-1 text-zinc-700 border-b border-dashed border-zinc-400 pb-3 mb-3">
-              <p>Invoice : {selectedTx.invoiceNumber}</p>
-              <p>Kasir   : {selectedTx.cashierName}</p>
-              <p>Waktu   : {selectedTx.createdAt ? new Date(selectedTx.createdAt).toLocaleString("id-ID") : "-"}</p>
-              {selectedTx.customerName && <p>Member  : {selectedTx.customerName}</p>}
-            </div>
+              <div className="space-y-1 text-zinc-700 border-b border-dashed border-zinc-400 pb-3 mb-3">
+                <p>Invoice : {selectedTx.invoiceNumber}</p>
+                <p>Kasir   : {selectedTx.cashierName}</p>
+                <p>Waktu   : {selectedTx.createdAt ? new Date(selectedTx.createdAt).toLocaleString("id-ID") : "-"}</p>
+                {selectedTx.customerName && <p>Member  : {selectedTx.customerName}</p>}
+              </div>
 
-            <div className="space-y-2 border-b border-dashed border-zinc-400 pb-3 mb-3">
-              {(selectedTx.items || []).map((it: any) => (
-                <div key={it.productId}>
-                  <p className="font-bold text-zinc-900">{it.productName}</p>
-                  <div className="flex justify-between text-zinc-700 pl-2">
-                    <span>{it.quantity} x Rp {it.sellPrice.toLocaleString("id-ID")}</span>
-                    <span>Rp {it.subtotal.toLocaleString("id-ID")}</span>
+              <div className="space-y-2 border-b border-dashed border-zinc-400 pb-3 mb-3">
+                {(selectedTx.items || []).map((it: any) => (
+                  <div key={it.productId}>
+                    <p className="font-bold text-zinc-900">{it.productName}</p>
+                    <div className="flex justify-between text-zinc-700 pl-2">
+                      <span>{it.quantity} x Rp {it.sellPrice.toLocaleString("id-ID")}</span>
+                      <span>Rp {it.subtotal.toLocaleString("id-ID")}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            <div className="space-y-1 border-b border-dashed border-zinc-400 pb-3 mb-3">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>Rp {selectedTx.totalRaw.toLocaleString("id-ID")}</span>
-              </div>
-              {selectedTx.discount > 0 && (
-                <div className="flex justify-between text-red-600">
-                  <span>Diskon</span>
-                  <span>-Rp {selectedTx.discount.toLocaleString("id-ID")}</span>
+              <div className="space-y-1 border-b border-dashed border-zinc-400 pb-3 mb-3">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>Rp {selectedTx.totalRaw.toLocaleString("id-ID")}</span>
                 </div>
-              )}
-              {(selectedTx.tax ?? 0) > 0 && (
-                <div className="flex justify-between text-zinc-700">
-                  <span>PPN ({selectedTx.taxRate ?? 0}%)</span>
-                  <span>Rp {(selectedTx.tax ?? 0).toLocaleString("id-ID")}</span>
-                </div>
-              )}
-              <div className="flex justify-between font-bold text-zinc-950 text-xs pt-1">
-                <span>TOTAL</span>
-                <span>Rp {selectedTx.totalPaid.toLocaleString("id-ID")}</span>
-              </div>
-            </div>
-
-            <div className="space-y-1 mb-4 text-zinc-700 border-b border-dashed border-zinc-400 pb-3">
-              <div className="flex justify-between">
-                <span>Metode Bayar</span>
-                <span>{selectedTx.paymentMethod}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Diterima</span>
-                <span>Rp {selectedTx.amountReceived.toLocaleString("id-ID")}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Kembalian</span>
-                <span>Rp {selectedTx.changeAmount.toLocaleString("id-ID")}</span>
-              </div>
-            </div>
-
-            {/* Member points info */}
-            {selectedTx.customerName && (
-              <div className="space-y-1 mb-4 text-[10px] text-zinc-650">
-                {(selectedTx.pointsRedeemed ?? 0) > 0 && (
-                  <div className="flex justify-between">
-                    <span>Poin Ditukarkan</span>
-                    <span>-{selectedTx.pointsRedeemed ?? 0} Poin</span>
+                {selectedTx.discount > 0 && (
+                  <div className="flex justify-between text-red-600">
+                    <span>Diskon</span>
+                    <span>-Rp {selectedTx.discount.toLocaleString("id-ID")}</span>
                   </div>
                 )}
-                {(selectedTx.pointsEarned ?? 0) > 0 && (
-                  <div className="flex justify-between">
-                    <span>Poin Didapatkan</span>
-                    <span>+{selectedTx.pointsEarned ?? 0} Poin</span>
+                {(selectedTx.tax ?? 0) > 0 && (
+                  <div className="flex justify-between text-zinc-700">
+                    <span>PPN ({selectedTx.taxRate ?? 0}%)</span>
+                    <span>Rp {(selectedTx.tax ?? 0).toLocaleString("id-ID")}</span>
                   </div>
                 )}
+                <div className="flex justify-between font-bold text-zinc-950 text-xs pt-1">
+                  <span>TOTAL</span>
+                  <span>Rp {selectedTx.totalPaid.toLocaleString("id-ID")}</span>
+                </div>
               </div>
-            )}
 
-            <div className="text-center border-t border-dashed border-zinc-400 pt-3 text-[10px] text-zinc-600">
-              <p className="font-bold text-zinc-800">--- REPRINTED RECEIPT ---</p>
+              <div className="space-y-1 mb-4 text-zinc-700 border-b border-dashed border-zinc-400 pb-3">
+                <div className="flex justify-between">
+                  <span>Metode Bayar</span>
+                  <span>{selectedTx.paymentMethod}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Diterima</span>
+                  <span>Rp {selectedTx.amountReceived.toLocaleString("id-ID")}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Kembalian</span>
+                  <span>Rp {selectedTx.changeAmount.toLocaleString("id-ID")}</span>
+                </div>
+              </div>
+
+              {/* Member points info */}
+              {selectedTx.customerName && (
+                <div className="space-y-1 mb-4 text-[10px] text-zinc-650">
+                  {(selectedTx.pointsRedeemed ?? 0) > 0 && (
+                    <div className="flex justify-between">
+                      <span>Poin Ditukarkan</span>
+                      <span>-{selectedTx.pointsRedeemed ?? 0} Poin</span>
+                    </div>
+                  )}
+                  {(selectedTx.pointsEarned ?? 0) > 0 && (
+                    <div className="flex justify-between">
+                      <span>Poin Didapatkan</span>
+                      <span>+{selectedTx.pointsEarned ?? 0} Poin</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="text-center border-t border-dashed border-zinc-400 pt-3 text-[10px] text-zinc-600 pb-2">
+                <p className="font-bold text-zinc-800">--- REPRINTED RECEIPT ---</p>
+              </div>
             </div>
 
-            <div className="absolute top-full left-0 right-0 mt-4 flex gap-3">
+            {/* Static Action Footer inside Card */}
+            <div className="p-4 border-t border-dashed border-zinc-200 bg-zinc-50 flex shrink-0">
               <button
                 onClick={() => setSelectedTx(null)}
                 className="w-full bg-primary hover:bg-primary/95 text-white py-2.5 rounded-xl flex items-center justify-center gap-2 font-sans font-semibold text-xs shadow-md shadow-primary/20 cursor-pointer"
