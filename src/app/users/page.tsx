@@ -194,7 +194,7 @@ export default function UsersManagement() {
           <div className="flex-1 overflow-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-zinc-900 border-b border-zinc-800 text-zinc-300 font-bold text-[10px] uppercase tracking-wider">
+                <tr className="bg-zinc-900 border-b border-zinc-800 text-zinc-300 font-bold text-[10px] uppercase tracking-wider sticky top-0 z-10">
                   <th className="py-4 px-6">Nama Lengkap</th>
                   <th className="py-4 px-6">Username</th>
                   <th className="py-4 px-6">Hak Akses / Wewenang</th>

@@ -201,7 +201,7 @@ export default function MembersPage() {
           <div className="flex-1 overflow-auto">
             <table className="w-full text-left border-collapse min-w-[600px]">
               <thead>
-                <tr className="border-b border-[#1f1f23] bg-[#141416]/50 text-zinc-450 uppercase text-[10px] tracking-wider font-bold">
+                <tr className="border-b border-[#1f1f23] bg-[#121214] text-zinc-450 uppercase text-[10px] tracking-wider font-bold sticky top-0 z-10">
                   <th className="py-4 px-6 font-semibold">Nama Lengkap</th>
                   <th className="py-4 px-6 font-semibold">Nomor Telepon</th>
                   <th className="py-4 px-6 font-semibold text-center">Poin Terkumpul</th>
