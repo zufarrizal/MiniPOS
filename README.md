@@ -115,18 +115,20 @@ Gunakan kredensial berikut untuk masuk ke aplikasi:
 
 ## 📦 Menjalankan Mode Produksi & Menggunakan Peluncur `MiniPOS.exe`
 
-Aplikasi ini dilengkapi dengan biner peluncur **`MiniPOS.exe`** untuk memudahkan jalannya server dalam mode produksi di sistem operasi Windows tanpa perlu membuka terminal CMD manual.
+Aplikasi ini dilengkapi dengan biner peluncur Windows yang tersedia di [GitHub Releases](https://github.com/zufarrizal/MiniPOS/releases). Unduh `MiniPOS.exe` dan `MiniPOS-Stop.exe` dari release terbaru untuk menjalankan atau menghentikan server production tanpa perlu membuka terminal CMD manual.
 
 ### Cara Menggunakan Peluncur:
 1. Pastikan aplikasi Next.js telah dikompilasi ke versi produksi:
    ```bash
    npm run build
    ```
-2. Cukup klik ganda (double-click) pada file **`MiniPOS.exe`**.
+2. Unduh dan ekstrak **`MiniPOS.exe`** dari [release terbaru](https://github.com/zufarrizal/MiniPOS/releases/latest), lalu klik ganda (double-click) file tersebut.
 3. Peluncur akan:
    * Memeriksa dan mematikan port 3000 jika masih ada sisa proses yang berjalan.
    * Menjalankan server Next.js mode produksi (`next start`) secara background.
    * Server otomatis siap diakses kembali secara stabil di port **3000**!
+
+Untuk menghentikan server, jalankan **`MiniPOS-Stop.exe`**.
 
 ---
 
