@@ -115,20 +115,35 @@ Gunakan kredensial berikut untuk masuk ke aplikasi:
 
 ## 📦 Menjalankan Mode Produksi & Menggunakan Peluncur `MiniPOS.exe`
 
-Aplikasi ini dilengkapi dengan biner peluncur Windows yang tersedia di [GitHub Releases](https://github.com/zufarrizal/MiniPOS/releases). Unduh `MiniPOS.exe` dan `MiniPOS-Stop.exe` dari release terbaru untuk menjalankan atau menghentikan server production tanpa perlu membuka terminal CMD manual.
+Aplikasi ini dilengkapi dengan launcher Windows yang tersedia di [GitHub Releases](https://github.com/zufarrizal/MiniPOS/releases). **`MiniPOS.exe` dan `MiniPOS-Stop.exe` bukan aplikasi POS standalone**; keduanya hanya launcher untuk menjalankan atau menghentikan server website MiniPOS. File `.exe` tidak berisi source code, database, Node.js, dependency, atau hasil build Next.js.
+
+Launcher membutuhkan Windows, Node.js versi 20.9+, source code repository, dependency, database lokal, dan hasil build production yang sudah disiapkan terlebih dahulu.
 
 ### Cara Menggunakan Peluncur:
-1. Pastikan aplikasi Next.js telah dikompilasi ke versi produksi:
+1. Clone repository, masuk ke folder proyek, lalu siapkan dependency dan database:
+   ```bash
+   git clone https://github.com/zufarrizal/MiniPOS.git
+   cd MiniPOS
+   npm install
+   npx drizzle-kit push
+   ```
+2. Isi data awal jika diperlukan:
+   ```bash
+   npx tsx src/db/seed.ts
+   ```
+3. Kompilasi aplikasi Next.js ke versi produksi:
    ```bash
    npm run build
    ```
-2. Unduh dan ekstrak **`MiniPOS.exe`** dari [release terbaru](https://github.com/zufarrizal/MiniPOS/releases/latest), lalu klik ganda (double-click) file tersebut.
-3. Peluncur akan:
+4. Unduh **`MiniPOS.exe`** dan **`MiniPOS-Stop.exe`** dari [release terbaru](https://github.com/zufarrizal/MiniPOS/releases/latest), lalu simpan keduanya di **folder root proyek** yang berisi `package.json` dan `.next`.
+5. Klik ganda **`MiniPOS.exe`**. Peluncur akan:
    * Memeriksa dan mematikan port 3000 jika masih ada sisa proses yang berjalan.
    * Menjalankan server Next.js mode produksi (`next start`) secara background.
    * Server otomatis siap diakses kembali secara stabil di port **3000**!
 
-Untuk menghentikan server, jalankan **`MiniPOS-Stop.exe`**.
+6. Buka website MiniPOS melalui `http://localhost:3000`.
+
+Untuk menghentikan server, jalankan **`MiniPOS-Stop.exe`** dari folder root proyek yang sama.
 
 ---
 
