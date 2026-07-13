@@ -61,8 +61,8 @@ Pastikan komputer Anda sudah terinstal:
 
 ### 2. Kloning Repositori
 ```bash
-git clone https://github.com/zufarrizal/POS-SYSTEM.git
-cd POS-SYSTEM
+git clone https://github.com/zufarrizal/MiniPOS.git
+cd MiniPOS
 ```
 
 ### 3. Instalasi Dependensi
