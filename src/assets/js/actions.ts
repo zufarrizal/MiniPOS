@@ -12,6 +12,60 @@ import {
   settings 
 } from "@/db/schema";
 import { eq, desc, and, sql, ne } from "drizzle-orm";
+import { cookies } from "next/headers";
+import { createHmac, randomBytes, scrypt as scryptCallback, timingSafeEqual } from "crypto";
+import { promisify } from "util";
+
+const scrypt = promisify(scryptCallback);
+const SESSION_COOKIE = "minipos_session";
+const SESSION_SECRET = process.env.SESSION_SECRET || (process.env.NODE_ENV === "production" ? null : "minipos-local-development-secret");
+type SessionUser = { id: number; username: string; name: string; role: "ADMIN" | "CASHIER" };
+
+function sessionToken(user: SessionUser) {
+  if (!SESSION_SECRET) throw new Error("SESSION_SECRET wajib diatur pada production.");
+  const payload = Buffer.from(JSON.stringify({ ...user, exp: Date.now() + 8 * 60 * 60 * 1000 })).toString("base64url");
+  const signature = createHmac("sha256", SESSION_SECRET).update(payload).digest("base64url");
+  return `${payload}.${signature}`;
+}
+
+async function getSessionUser(): Promise<SessionUser | null> {
+  if (!SESSION_SECRET) return null;
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  if (!token) return null;
+  const [payload, signature] = token.split(".");
+  if (!payload || !signature) return null;
+  const expected = createHmac("sha256", SESSION_SECRET).update(payload).digest("base64url");
+  if (signature.length !== expected.length || !timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) return null;
+  try {
+    const parsed = JSON.parse(Buffer.from(payload, "base64url").toString()) as SessionUser & { exp: number };
+    if (parsed.exp < Date.now()) return null;
+    const found = await db.select({ id: users.id, username: users.username, name: users.name, role: users.role })
+      .from(users).where(eq(users.id, parsed.id)).limit(1);
+    if (!found[0] || (found[0].role !== "ADMIN" && found[0].role !== "CASHIER")) return null;
+    return { ...found[0], role: found[0].role as SessionUser["role"] };
+  } catch { return null; }
+}
+
+async function requireUser(role?: SessionUser["role"]) {
+  const user = await getSessionUser();
+  if (!user) throw new Error("UNAUTHORIZED");
+  if (role && user.role !== role) throw new Error("FORBIDDEN");
+  return user;
+}
+
+async function hashPassword(password: string) {
+  const salt = randomBytes(16).toString("hex");
+  const derived = await scrypt(password, salt, 64) as Buffer;
+  return `scrypt:${salt}:${derived.toString("hex")}`;
+}
+
+async function verifyPassword(password: string, stored: string) {
+  if (!stored.startsWith("scrypt:")) return stored === password;
+  const [, salt, hash] = stored.split(":");
+  const derived = await scrypt(password, salt, 64) as Buffer;
+  const expected = Buffer.from(hash, "hex");
+  return expected.length === derived.length && timingSafeEqual(expected, derived);
+}
 
 // ----------------------------------------------------
 // PRODUCT ACTIONS
@@ -19,6 +73,7 @@ import { eq, desc, and, sql, ne } from "drizzle-orm";
 
 export async function getProducts() {
   try {
+    await requireUser();
     return await db.select().from(products).where(eq(products.isActive, 1));
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -37,8 +92,15 @@ export async function saveProductAction(payload: {
   minStock: number;
   unit: string;
   discountPercent?: number;
-}): Promise<{ success: boolean; message?: string; error?: string }> {
+  }): Promise<{ success: boolean; message?: string; error?: string }> {
   try {
+    await requireUser("ADMIN");
+    if (!payload.barcode.trim() || !payload.name.trim() || !Number.isInteger(payload.categoryId) ||
+        !Number.isFinite(payload.buyPrice) || payload.buyPrice < 0 || !Number.isFinite(payload.sellPrice) || payload.sellPrice < 0 ||
+        !Number.isInteger(payload.stock) || payload.stock < 0 || !Number.isInteger(payload.minStock) || payload.minStock < 0 ||
+        !Number.isFinite(payload.discountPercent ?? 0) || (payload.discountPercent ?? 0) < 0 || (payload.discountPercent ?? 0) > 100) {
+      return { success: false, error: "Data produk tidak valid." };
+    }
     if (payload.id) {
       // Edit mode
       await db.update(products)
@@ -89,6 +151,7 @@ export async function saveProductAction(payload: {
 
 export async function deleteProductAction(id: number): Promise<{ success: boolean; message?: string; error?: string }> {
   try {
+    await requireUser("ADMIN");
     // Soft delete to prevent transaction foreign key errors
     await db.update(products)
       .set({ isActive: 0 })
@@ -106,6 +169,7 @@ export async function deleteProductAction(id: number): Promise<{ success: boolea
 
 export async function getCategories() {
   try {
+    await requireUser();
     return await db.select().from(categories);
   } catch (error) {
     console.error("Error fetching categories:", error);
@@ -115,6 +179,7 @@ export async function getCategories() {
 
 export async function addCategoryAction(name: string, description?: string) {
   try {
+    await requireUser("ADMIN");
     const res = await db.insert(categories).values({
       name,
       description
@@ -132,6 +197,7 @@ export async function addCategoryAction(name: string, description?: string) {
 
 export async function getCustomers() {
   try {
+    await requireUser();
     return await db.select().from(customers);
   } catch (error) {
     console.error("Error fetching customers:", error);
@@ -141,6 +207,10 @@ export async function getCustomers() {
 
 export async function saveCustomerAction(customer: { id?: number; name: string; phone?: string; points?: number }) {
   try {
+    await requireUser();
+    if (!customer.name.trim() || (customer.points !== undefined && (!Number.isInteger(customer.points) || customer.points < 0))) {
+      return { success: false, error: "Data member tidak valid." };
+    }
     const phoneVal = customer.phone?.trim() || null;
     
     if (customer.id) {
@@ -193,6 +263,7 @@ export async function saveCustomerAction(customer: { id?: number; name: string; 
 
 export async function deleteCustomerAction(id: number) {
   try {
+    await requireUser("ADMIN");
     await db.delete(customers).where(eq(customers.id, id));
     return { success: true };
   } catch (error: any) {
@@ -207,6 +278,7 @@ export async function deleteCustomerAction(id: number) {
 
 export async function getOpenShift() {
   try {
+    await requireUser();
     const res = await db.select()
       .from(shifts)
       .where(eq(shifts.status, "OPEN"))
@@ -220,6 +292,8 @@ export async function getOpenShift() {
 
 export async function openShiftAction(startingCash: number, cashierName: string) {
   try {
+    const current = await requireUser("CASHIER");
+    if (!Number.isFinite(startingCash) || startingCash < 0) return { success: false, error: "Modal awal tidak valid." };
     // Check if there is already an open shift
     const existing = await getOpenShift();
     if (existing) {
@@ -227,7 +301,7 @@ export async function openShiftAction(startingCash: number, cashierName: string)
     }
 
     const res = await db.insert(shifts).values({
-      cashierName,
+      cashierName: current.name,
       startTime: new Date().toISOString(),
       startingCash,
       expectedEndingCash: startingCash,
@@ -243,12 +317,17 @@ export async function openShiftAction(startingCash: number, cashierName: string)
 
 export async function closeShiftAction(shiftId: number, actualEndingCash: number) {
   try {
+    const current = await requireUser("CASHIER");
+    if (!Number.isInteger(shiftId) || !Number.isFinite(actualEndingCash) || actualEndingCash < 0) return { success: false, error: "Data penutupan shift tidak valid." };
     const shiftList = await db.select().from(shifts).where(eq(shifts.id, shiftId)).limit(1);
     if (shiftList.length === 0) {
       return { success: false, error: "Shift tidak ditemukan." };
     }
 
     const shift = shiftList[0];
+    if (shift.cashierName !== current.name || shift.status !== "OPEN") {
+      return { success: false, error: "Shift tidak valid untuk akun ini." };
+    }
     const discrepancy = actualEndingCash - shift.expectedEndingCash;
 
     const res = await db.update(shifts)
@@ -270,6 +349,7 @@ export async function closeShiftAction(shiftId: number, actualEndingCash: number
 
 export async function getShiftLogs() {
   try {
+    await requireUser("ADMIN");
     return await db.select().from(shifts).orderBy(desc(shifts.startTime));
   } catch (error) {
     console.error("Error fetching shift logs:", error);
@@ -308,6 +388,15 @@ export interface TransactionPayload {
 
 export async function createTransactionAction(payload: TransactionPayload): Promise<{ success: boolean; transactionId?: number; error?: string }> {
   try {
+    const current = await requireUser("CASHIER");
+    if (!payload.items.length || payload.items.some(item => !Number.isInteger(item.productId) || !Number.isInteger(item.quantity) || item.quantity <= 0 || !Number.isFinite(item.subtotal) || item.subtotal < 0) ||
+        !Number.isFinite(payload.totalPaid) || payload.totalPaid < 0 || !Number.isFinite(payload.amountReceived) || payload.amountReceived < 0) {
+      return { success: false, error: "Data transaksi tidak valid." };
+    }
+    const shift = await db.select().from(shifts).where(eq(shifts.id, payload.shiftId)).limit(1);
+    if (!shift[0] || shift[0].status !== "OPEN" || shift[0].cashierName !== current.name) {
+      return { success: false, error: "Shift kasir tidak valid." };
+    }
     // Load point multiplier from settings dynamically
     const multSetting = await db.select().from(settings).where(eq(settings.key, "points_per_multiplier")).limit(1);
     const multiplier = multSetting.length > 0 ? (parseInt(multSetting[0].value) || 10000) : 10000;
@@ -319,7 +408,7 @@ export async function createTransactionAction(payload: TransactionPayload): Prom
       const txInsert = tx.insert(transactions).values({
         invoiceNumber: payload.invoiceNumber,
         shiftId: payload.shiftId,
-        cashierName: payload.cashierName,
+        cashierName: current.name,
         customerName: payload.customerName || null,
         totalRaw: payload.totalRaw,
         discount: payload.discount,
@@ -401,6 +490,7 @@ export async function createTransactionAction(payload: TransactionPayload): Prom
 
 export async function getTransactions() {
   try {
+    await requireUser();
     const txRecords = await db.select().from(transactions).orderBy(desc(transactions.createdAt));
     
     // Map with their respective items
@@ -432,23 +522,32 @@ export async function authenticateUserAction(username: string, password: string)
       .where(eq(users.username, username.toLowerCase()))
       .limit(1);
     
-    if (res.length === 0) {
-      return { success: false, error: "Username tidak ditemukan." };
-    }
+    if (res.length === 0) return { success: false, error: "Username atau password salah." };
     
     const user = res[0];
-    if (user.passwordHash !== password) {
-      return { success: false, error: "Password salah." };
+    if (!(await verifyPassword(password, user.passwordHash))) return { success: false, error: "Username atau password salah." };
+
+    // Migrasi otomatis akun lama yang masih menyimpan password plaintext.
+    if (!user.passwordHash.startsWith("scrypt:")) {
+      await db.update(users).set({ passwordHash: await hashPassword(password) }).where(eq(users.id, user.id));
     }
     
-    return { 
+    const safeUser: SessionUser = {
+      id: user.id,
+      username: user.username,
+      name: user.name,
+      role: user.role as SessionUser["role"]
+    };
+    (await cookies()).set(SESSION_COOKIE, sessionToken(safeUser), {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 8 * 60 * 60,
+      path: "/"
+    });
+    return {
       success: true, 
-      user: {
-        id: user.id,
-        username: user.username,
-        name: user.name,
-        role: user.role as 'ADMIN' | 'CASHIER'
-      }
+      user: safeUser
     };
   } catch (error: any) {
     console.error("Error authenticating user:", error);
@@ -456,17 +555,33 @@ export async function authenticateUserAction(username: string, password: string)
   }
 }
 
+export async function getCurrentUserAction() {
+  return await getSessionUser();
+}
+
+export async function logoutUserAction() {
+  (await cookies()).set(SESSION_COOKIE, "", { httpOnly: true, expires: new Date(0), path: "/" });
+  return { success: true };
+}
+
 export async function getUsers() {
   try {
-    return await db.select().from(users).orderBy(desc(users.createdAt));
+    await requireUser("ADMIN");
+    return await db.select({ id: users.id, username: users.username, name: users.name, role: users.role, createdAt: users.createdAt }).from(users).orderBy(desc(users.createdAt));
   } catch (error) {
     console.error("Error fetching users:", error);
     return [];
   }
 }
 
-export async function saveUserAction(user: { id?: number; username: string; passwordHash: string; name: string; role: 'ADMIN' | 'CASHIER' }) {
+export async function saveUserAction(user: { id?: number; username: string; password?: string; role: 'ADMIN' | 'CASHIER'; name: string }) {
   try {
+    await requireUser("ADMIN");
+    if (!/^[a-zA-Z0-9._-]{3,40}$/.test(user.username) || !user.name.trim() || !["ADMIN", "CASHIER"].includes(user.role)) {
+      return { success: false, error: "Data staf tidak valid." };
+    }
+    if (!user.id && (!user.password || user.password.length < 8)) return { success: false, error: "Password minimal 8 karakter." };
+    if (user.password && user.password.length < 8) return { success: false, error: "Password minimal 8 karakter." };
     if (user.id) {
       // Check existing username for other users
       const existing = await db.select().from(users)
@@ -480,13 +595,9 @@ export async function saveUserAction(user: { id?: number; username: string; pass
       }
 
       // Update
-      const res = await db.update(users)
-        .set({
-          username: user.username.toLowerCase(),
-          passwordHash: user.passwordHash,
-          name: user.name,
-          role: user.role
-        })
+      const updates: { username: string; name: string; role: 'ADMIN' | 'CASHIER'; passwordHash?: string } = { username: user.username.toLowerCase(), name: user.name, role: user.role };
+      if (user.password) updates.passwordHash = await hashPassword(user.password);
+      const res = await db.update(users).set(updates)
         .where(eq(users.id, user.id))
         .returning();
       return { success: true, user: res[0] };
@@ -500,7 +611,7 @@ export async function saveUserAction(user: { id?: number; username: string; pass
       // Insert
       const res = await db.insert(users).values({
         username: user.username.toLowerCase(),
-        passwordHash: user.passwordHash,
+        passwordHash: await hashPassword(user.password || ""),
         name: user.name,
         role: user.role,
         createdAt: new Date().toISOString()
@@ -515,6 +626,8 @@ export async function saveUserAction(user: { id?: number; username: string; pass
 
 export async function deleteUserAction(id: number) {
   try {
+    const current = await requireUser("ADMIN");
+    if (current.id === id) return { success: false, error: "Tidak dapat menghapus akun yang sedang digunakan." };
     await db.delete(users).where(eq(users.id, id));
     return { success: true };
   } catch (error: any) {
@@ -529,6 +642,7 @@ export async function deleteUserAction(id: number) {
 
 export async function getSettingsAction() {
   try {
+    await requireUser();
     const list = await db.select().from(settings);
     
     // Default settings to seed if empty
@@ -588,6 +702,7 @@ export async function getSettingsAction() {
 
 export async function saveSettingsAction(settingsList: { key: string; value: string }[]) {
   try {
+    await requireUser("ADMIN");
     for (const item of settingsList) {
       await db.update(settings)
         .set({
@@ -606,6 +721,7 @@ export async function saveSettingsAction(settingsList: { key: string; value: str
 
 export async function deleteShiftAction(id: number) {
   try {
+    await requireUser("ADMIN");
     return db.transaction((tx) => {
       // First delete transactions that reference this shift to maintain foreign key integrity
       const txs = tx.select().from(transactions).where(eq(transactions.shiftId, id)).all();

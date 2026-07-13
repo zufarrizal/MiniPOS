@@ -17,7 +17,6 @@ import { useCartStore } from "@/store/cartStore";
 interface StaffUser {
   id: number;
   username: string;
-  passwordHash: string;
   name: string;
   role: string;
   createdAt: string;
@@ -97,7 +96,7 @@ export default function UsersManagement() {
     const payload = {
       id: editingUser ? editingUser.id : undefined,
       username: username.trim(),
-      passwordHash: password ? password : (editingUser ? editingUser.passwordHash : ""),
+      password: password || undefined,
       name: name.trim(),
       role: role
     };

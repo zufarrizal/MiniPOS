@@ -18,7 +18,7 @@ import {
   Lock
 } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
-import { authenticateUserAction, getSettingsAction } from "@/assets/js/actions";
+import { authenticateUserAction, getSettingsAction, logoutUserAction } from "@/assets/js/actions";
 
 export default function LayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -50,6 +50,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
 
   // Load dynamic settings on user session or component load
   useEffect(() => {
+    if (!currentUser) return;
     getSettingsAction().then(data => {
       const nameSetting = data.find(s => s.key === "store_name");
       if (nameSetting) {
@@ -196,6 +197,65 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
   // Verify access authorization for active route
   const isRestricted = currentUser && currentUser.role === 'CASHIER' && pathname !== '/cashier' && pathname !== '/reports' && pathname !== '/members';
 
+  // Jangan render layout aplikasi maupun children sebelum sesi login dipulihkan.
+  // Sebelumnya form login hanya menjadi overlay di atas dashboard, sehingga
+  // konten dashboard tetap ada di DOM dan terbaca meskipun pengguna belum login.
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen w-screen bg-[#09090b] text-foreground flex items-center justify-center font-sans antialiased overflow-hidden relative">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
+
+        <div className="w-[400px] glass-card rounded-2xl p-8 shadow-2xl relative border-zinc-700 z-10 animate-in fade-in zoom-in-95 duration-200">
+          <div className="flex flex-col items-center text-center mb-6">
+            <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 mb-3">
+              <Store className="w-6 h-6 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-zinc-100">{storeName}</h2>
+            <p className="text-xs text-zinc-400 mt-1.5 max-w-xs">Silakan masukkan username & password untuk masuk ke sistem</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="text-[10px] text-zinc-350 font-bold block mb-1">Username</label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value.replace(/\s+/g, ""))}
+                className="w-full bg-[#18181b] border border-zinc-600 rounded-xl py-2.5 px-4 text-xs text-zinc-150 focus:outline-none focus:border-primary font-bold placeholder-zinc-700 transition-all"
+                placeholder="Masukkan username staf..."
+                autoFocus
+                required
+              />
+            </div>
+
+            <div>
+              <label className="text-[10px] text-zinc-350 font-bold block mb-1">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-[#18181b] border border-zinc-600 rounded-xl py-2.5 px-4 text-xs text-zinc-150 focus:outline-none focus:border-primary font-bold placeholder-zinc-700 transition-all"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+
+            {loginError && (
+              <p className="text-xs text-red-400 font-bold bg-red-500/10 border border-red-500/20 p-2.5 rounded-lg animate-in fade-in slide-in-from-bottom-1 duration-150">
+                {loginError}
+              </p>
+            )}
+
+            <button type="submit" className="w-full py-2.5 rounded-xl bg-primary text-white hover:bg-primary/95 text-xs font-bold transition-all cursor-pointer shadow-lg shadow-primary/20">
+              Masuk Sistem
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div key="main-layout-root" className="flex h-screen w-screen bg-[#09090b] text-foreground font-sans antialiased overflow-hidden relative">
       {/* IF USER IS NOT LOGGED IN: Render Username/Password Login Form Overlay */}
@@ -317,8 +377,10 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
 
             <button
               onClick={() => {
-                logoutUser();
-                router.push("/dashboard");
+                logoutUserAction().finally(() => {
+                  logoutUser();
+                  router.push("/dashboard");
+                });
               }}
               className="text-[9px] text-zinc-300 hover:text-red-400 border border-zinc-650 bg-zinc-800 hover:bg-zinc-750 px-2 py-1 rounded-md font-bold transition-all shrink-0 cursor-pointer"
               title="Keluar dari Akun"

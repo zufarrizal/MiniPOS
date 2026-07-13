@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Product, Customer, TransactionItem, Shift } from '../data/mockData';
 import { 
+  getCurrentUserAction,
   getOpenShift, 
   openShiftAction, 
   closeShiftAction 
@@ -65,15 +66,9 @@ export const useCartStore = create<CartState>((set, get) => ({
   currentUser: null,
   loginUser: (user) => {
     set({ currentUser: user, cashierName: user.name });
-    if (typeof window !== "undefined") {
-      localStorage.setItem("minipos_user", JSON.stringify(user));
-    }
   },
   logoutUser: () => {
     set({ currentUser: null });
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("minipos_user");
-    }
   },
 
   activeShift: null,
@@ -89,23 +84,9 @@ export const useCartStore = create<CartState>((set, get) => ({
   syncShift: async () => {
     set({ isLoadingShift: true });
     try {
-      if (typeof window !== "undefined") {
-        const storedUser = localStorage.getItem("minipos_user");
-        if (storedUser) {
-          try {
-            const parsed = JSON.parse(storedUser) as UserInfo;
-            if (parsed && parsed.name && parsed.role) {
-              set({ currentUser: parsed, cashierName: parsed.name });
-            } else {
-              localStorage.removeItem("minipos_user");
-            }
-          } catch (e) {
-            console.error("Malformed stored user JSON:", e);
-            localStorage.removeItem("minipos_user");
-          }
-        }
-      }
-      const openShift = await getOpenShift();
+      const sessionUser = await getCurrentUserAction();
+      if (sessionUser) set({ currentUser: sessionUser, cashierName: sessionUser.name });
+      const openShift = sessionUser ? await getOpenShift() : null;
       if (openShift) {
         // Map database status to frontend Shift status
         const mappedShift: Shift = {

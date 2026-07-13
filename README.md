@@ -56,7 +56,7 @@
 
 ### 1. Prasyarat Sistem
 Pastikan komputer Anda sudah terinstal:
-* [Node.js](https://nodejs.org/) (Sangat direkomendasikan versi LTS terbaru atau versi 24+)
+* [Node.js](https://nodejs.org/) versi **20.9+** (LTS terbaru sangat direkomendasikan)
 * [Git](https://git-scm.com/)
 
 ### 2. Kloning Repositori
@@ -87,6 +87,16 @@ npx tsx src/db/seed.ts
 npm run dev
 ```
 Buka peramban browser Anda di alamat [http://localhost:3000](http://localhost:3000).
+
+### 7. Konfigurasi Session untuk Production
+
+Untuk menjalankan aplikasi di production, buat environment variable `SESSION_SECRET` dengan nilai acak yang panjang:
+
+```env
+SESSION_SECRET=ganti-dengan-rahasia-acak-yang-panjang
+```
+
+Variable ini digunakan untuk menandatangani session login. Pada mode development, aplikasi menyediakan nilai default lokal.
 
 ---
 
