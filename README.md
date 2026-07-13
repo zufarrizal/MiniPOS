@@ -42,7 +42,7 @@
 
 ## 🛠️ Tech Stack (Teknologi yang Digunakan)
 
-* **Framework Frontend & Backend**: [Next.js 14](https://nextjs.org/) (App Router & React Server Actions)
+* **Framework Frontend & Backend**: [Next.js 16](https://nextjs.org/) (App Router & React Server Actions)
 * **Database**: [SQLite](https://sqlite.org/) (Menggunakan driver super cepat [better-sqlite3](https://github.com/WiseLibs/better-sqlite3))
 * **Object Relational Mapper (ORM)**: [Drizzle ORM](https://orm.drizzle.team/) & [Drizzle Kit](https://orm.drizzle.team/kit-docs/overview)
 * **Styling**: [Tailwind CSS](https://tailwindcss.com/) dengan Google Fonts **Inter** global.

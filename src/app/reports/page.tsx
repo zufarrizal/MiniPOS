@@ -412,7 +412,7 @@ export default function Reports() {
       {/* View Detailed Struk Receipt Modal */}
        {selectedTx && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
-          <div className="w-[340px] max-h-[90vh] bg-white text-zinc-900 rounded-2xl shadow-2xl flex flex-col overflow-hidden font-mono text-[11px] leading-normal animate-in fade-in zoom-in-95 duration-200">
+          <div className="print-receipt w-[340px] max-h-[90vh] bg-white text-zinc-900 rounded-2xl shadow-2xl flex flex-col overflow-hidden font-mono text-[11px] leading-normal animate-in fade-in zoom-in-95 duration-200">
             
             {/* Scrollable Receipt Body */}
             <div className="flex-1 overflow-y-auto p-6 pb-2">
@@ -502,10 +502,17 @@ export default function Reports() {
             </div>
 
             {/* Static Action Footer inside Card */}
-            <div className="p-4 border-t border-dashed border-zinc-200 bg-zinc-50 flex shrink-0">
+            <div className="print:hidden p-4 border-t border-dashed border-zinc-200 bg-zinc-50 flex gap-3 shrink-0">
+              <button
+                onClick={() => window.print()}
+                className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white py-2.5 rounded-xl flex items-center justify-center gap-2 font-sans font-semibold text-xs cursor-pointer"
+              >
+                <Printer className="w-4 h-4" />
+                Cetak Struk
+              </button>
               <button
                 onClick={() => setSelectedTx(null)}
-                className="w-full bg-primary hover:bg-primary/95 text-white py-2.5 rounded-xl flex items-center justify-center gap-2 font-sans font-semibold text-xs shadow-md shadow-primary/20 cursor-pointer"
+                className="flex-1 bg-primary hover:bg-primary/95 text-white py-2.5 rounded-xl flex items-center justify-center gap-2 font-sans font-semibold text-xs shadow-md shadow-primary/20 cursor-pointer"
               >
                 Tutup
               </button>
